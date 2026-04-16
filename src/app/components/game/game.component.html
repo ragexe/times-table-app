@@ -29,9 +29,28 @@
       @for (opt of options(); track opt) {
         <button
           (click)="handleAnswer(opt)"
-          class="py-6 text-3xl font-bold rounded-2xl bg-orange-100 text-orange-600 border-b-8 border-orange-200 hover:bg-orange-400 hover:text-white hover:border-orange-500 active:border-b-0 active:translate-y-1 transition-all"
+          [disabled]="wrongAnswers().includes(opt) || isAnswered()"
+          [class.opacity-40]="
+            wrongAnswers().includes(opt) || (isAnswered() && !correctAnswers().includes(opt))
+          "
+          [class.grayscale]="
+            wrongAnswers().includes(opt) || (isAnswered() && !correctAnswers().includes(opt))
+          "
+          class="py-6 text-3xl font-bold rounded-2xl transition-all border-b-8 bg-orange-100 text-orange-600 border-orange-200 enabled:hover:bg-orange-400 enabled:hover:text-white disabled:cursor-default"
         >
           {{ opt }}
+        </button>
+      }
+    </div>
+
+    <!-- "Next" Button - Only visible when answered correctly -->
+    <div class="mt-10 h-20">
+      @if (isAnswered()) {
+        <button
+          (click)="nextQuestion()"
+          class="w-full py-4 text-2xl font-black bg-green-500 text-white rounded-2xl shadow-lg hover:bg-green-600 animate-bounce transition-all border-b-8 border-green-700"
+        >
+          СЛЕДУЮЩИЙ ➔
         </button>
       }
     </div>

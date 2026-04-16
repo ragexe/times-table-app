@@ -1,4 +1,4 @@
-import { Component, type OnInit, input, signal, type WritableSignal } from '@angular/core';
+import { Component, type OnInit, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 type GameMode = 'train' | 'test';
@@ -10,11 +10,14 @@ type GameMode = 'train' | 'test';
   templateUrl: './game.component.html',
 })
 export class GameComponent implements OnInit {
-  protected readonly numberLeft: WritableSignal<number> = signal(0);
-  protected readonly numberRight: WritableSignal<number> = signal(0);
-  protected readonly options: WritableSignal<number[]> = signal([]);
-  protected readonly score: WritableSignal<number> = signal(0);
-  protected readonly message: WritableSignal<string> = signal('Приготовься...');
+  protected readonly numberLeft = signal(0);
+  protected readonly numberRight = signal(0);
+  protected readonly options = signal<number[]>([]);
+  protected readonly score = signal(0);
+  protected readonly message = signal('Приготовься...');
+  protected readonly isAnswered = signal(false);
+  protected readonly wrongAnswers = signal<number[]>([]);
+  protected readonly correctAnswers = signal<number[]>([]);
 
   public readonly table = input.required<string>();
 
@@ -22,7 +25,7 @@ export class GameComponent implements OnInit {
     transform: (inputValue) => (inputValue === 'test' ? 'test' : 'train'),
   });
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     this.generateQuestion();
   }
 
@@ -58,15 +61,29 @@ export class GameComponent implements OnInit {
    * Validates the user choice and updates the game state
    */
   protected handleAnswer(value: number): void {
-    if (value === this.numberLeft() * this.numberRight()) {
-      this.score.update((s) => s + 1);
-      this.message.set('⭐ Молодец!');
-      setTimeout(() => {
-        this.message.set('Следующий пример:');
-        this.generateQuestion();
-      }, 800);
+    // If already answered correctly, ignore further clicks
+    if (this.isAnswered()) return;
+
+    const isCorrect = value === this.numberLeft() * this.numberRight();
+
+    if (isCorrect) {
+      this.score.update((score) => score + 1);
+      this.message.set('⭐ Правильно! Молодец!');
+      this.isAnswered.set(true);
+      this.correctAnswers.update((prev) => [...prev, value]);
+      // Logic for "Confetti" or sound could go here
     } else {
-      this.message.set('❌ Попробуй ещё раз');
+      this.message.set('❌ Ой, почти! Попробуй ещё раз');
+      // Add to wrong answers list to disable/dim the button
+      this.wrongAnswers.update((prev) => [...prev, value]);
     }
+  }
+
+  protected nextQuestion(): void {
+    this.isAnswered.set(false);
+    this.wrongAnswers.set([]);
+    this.correctAnswers.set([]);
+    this.message.set('Выбери правильный ответ:');
+    this.generateQuestion();
   }
 }

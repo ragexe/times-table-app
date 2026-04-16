@@ -11,14 +11,14 @@ import { RouterLink } from '@angular/router';
       
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
         @for (num of tables; track num) {
-          <button [routerLink]="['/game', num, 'game']" 
+          <button [routerLink]="['/game', num]" 
             class="w-24 h-24 text-3xl font-black rounded-full bg-yellow-400 text-white shadow-xl hover:bg-yellow-500 transition-all active:scale-90 border-4 border-yellow-200">
             {{ num }}
           </button>
         }
       </div>
 
-      <button [routerLink]="['/game', 'random', 'game']" 
+      <button [routerLink]="['/game', 'random']" 
         class="mt-12 px-10 py-5 text-2xl font-bold bg-green-500 text-white rounded-2xl shadow-lg hover:bg-green-600 transition-all">
         🎲 Вразнобой
       </button>
