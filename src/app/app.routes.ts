@@ -5,6 +5,7 @@ import { GameComponent } from './components/game/game.component';
 
 export const routes: Routes = [
   { path: '', component: MenuComponent },
+  { path: 'game/:table', component: GameComponent },
   { path: 'game/:table/:mode', component: GameComponent },
   { path: '**', redirectTo: '' },
 ];

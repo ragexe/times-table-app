@@ -1,7 +1,9 @@
-import { Component, type OnInit, input, signal } from '@angular/core';
+import { Component, type OnInit, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-type GameMode = 'train' | 'test';
+import { SoundService } from '../../services/sound';
+
+type GameMode = 'training' | 'test';
 
 @Component({
   selector: 'app-game',
@@ -10,6 +12,8 @@ type GameMode = 'train' | 'test';
   templateUrl: './game.component.html',
 })
 export class GameComponent implements OnInit {
+  private readonly soundService = inject(SoundService);
+
   protected readonly numberLeft = signal(0);
   protected readonly numberRight = signal(0);
   protected readonly options = signal<number[]>([]);
@@ -21,8 +25,8 @@ export class GameComponent implements OnInit {
 
   public readonly table = input.required<string>();
 
-  public readonly mode = input<GameMode, string | null | undefined>('train', {
-    transform: (inputValue) => (inputValue === 'test' ? 'test' : 'train'),
+  public readonly mode = input<GameMode, string | null | undefined>('training', {
+    transform: (inputValue) => (inputValue === 'test' ? 'test' : 'training'),
   });
 
   ngOnInit(): void {
@@ -71,15 +75,18 @@ export class GameComponent implements OnInit {
       this.message.set('⭐ Правильно! Молодец!');
       this.isAnswered.set(true);
       this.correctAnswers.update((prev) => [...prev, value]);
-      // Logic for "Confetti" or sound could go here
+      this.soundService.playSuccess();
     } else {
       this.message.set('❌ Ой, почти! Попробуй ещё раз');
+      this.score.update((score) => (score > 1 ? score - 1 : 0));
       // Add to wrong answers list to disable/dim the button
       this.wrongAnswers.update((prev) => [...prev, value]);
+      this.soundService.playFailure();
     }
   }
 
   protected nextQuestion(): void {
+    this.soundService.playAirBurst();
     this.isAnswered.set(false);
     this.wrongAnswers.set([]);
     this.correctAnswers.set([]);
