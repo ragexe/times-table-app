@@ -1,0 +1,24 @@
+<div class="min-h-screen flex flex-col items-center justify-center p-4">
+  <div
+    class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md border-8 border-yellow-400 text-center"
+  >
+    <h1 class="text-2xl font-bold text-purple-600 mb-4">Счёт: {{ score }} ⭐</h1>
+
+    <div class="text-2xl mb-2 text-gray-500">{{ message }}</div>
+
+    <div class="text-7xl font-black text-blue-600 my-10">
+      {{ num1 }} <span class="text-red-400">×</span> {{ num2 }}
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      @for (opt of options; track opt) {
+        <button
+          (click)="checkAnswer(opt)"
+          class="py-6 text-3xl font-bold rounded-2xl bg-orange-100 hover:bg-orange-400 hover:text-white border-b-8 border-orange-200 active:border-b-0 transition-all text-orange-600"
+        >
+          {{ opt }}
+        </button>
+      }
+    </div>
+  </div>
+</div>
