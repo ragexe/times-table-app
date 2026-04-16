@@ -26,10 +26,13 @@ export default tseslint.config(
       ...angular.configs.tsRecommended,
     ],
     rules: {
+      '@typescript-eslint/no-magic-numbers': 'off',
+      
       '@angular-eslint/directive-selector': [
         'error',
         { type: 'attribute', prefix: 'app', style: 'camelCase' },
       ],
+
       '@angular-eslint/component-selector': [
         'error',
         { type: 'element', prefix: 'app', style: 'kebab-case' },
