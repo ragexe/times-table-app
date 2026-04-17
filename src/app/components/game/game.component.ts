@@ -21,7 +21,7 @@ import { SoundService } from '../../services/sound';
 export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
   private readonly TIME_LIMIT = 4000;
-  private readonly TICK_INTERVAL = 10;
+  private readonly TICK_INTERVAL = 40;
   private timerSubscription?: Subscription;
 
   protected readonly numberLeft = signal(0);
@@ -136,7 +136,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
   private handleTimeOut(): void {
     if (!this.isAnswered()) {
-      this.message.set('⏰ Время вышло!');
+      this.message.set('⏰ Время вышло! Нужно быстрее');
     }
   }
 }
