@@ -10,4 +10,9 @@ export const GAME_OPTIONS_POOL_SIZE = new InjectionToken<number>('GAME_OPTIONS_P
   factory: () => 4,
 });
 
+export const GAME_OPTIONS_SCORE_INCREMENT = new InjectionToken<number>('GAME_OPTIONS_POOL_SIZE', {
+  providedIn: 'root',
+  factory: () => 1,
+});
+
 

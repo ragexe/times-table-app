@@ -11,7 +11,11 @@ import { RouterLink } from '@angular/router';
 import { timer, type Subscription, tap } from 'rxjs';
 
 import { SoundService } from '../../services/sound';
-import { GAME_TIME_LIMIT, GAME_OPTIONS_POOL_SIZE } from '../../tokens/game-config.token';
+import {
+  GAME_TIME_LIMIT,
+  GAME_OPTIONS_POOL_SIZE,
+  GAME_OPTIONS_SCORE_INCREMENT,
+} from '../../tokens/game-config.token';
 
 @Component({
   selector: 'app-game',
@@ -24,6 +28,7 @@ export class GameComponent implements OnInit, OnDestroy {
   private readonly timeLimit = inject(GAME_TIME_LIMIT);
   private readonly tickInterval = Math.floor(this.timeLimit / 100);
   private readonly optionsPoolSize = inject(GAME_OPTIONS_POOL_SIZE);
+  private readonly scoreIncrement = inject(GAME_OPTIONS_SCORE_INCREMENT);
   private timerSubscription?: Subscription;
 
   protected readonly numberLeft = signal(0);
@@ -88,7 +93,7 @@ export class GameComponent implements OnInit, OnDestroy {
     const isCorrect = value === this.numberLeft() * this.numberRight();
 
     if (isCorrect) {
-      this.score.update((score) => score + 1);
+      this.score.update((score) => score + this.scoreIncrement);
       this.message.set('⭐ Правильно! Молодец!');
       this.isAnswered.set(true);
       this.correctAnswers.update((prev) => [...prev, value]);
@@ -96,7 +101,7 @@ export class GameComponent implements OnInit, OnDestroy {
       this.stopTimer();
     } else {
       this.message.set('❌ Ой, почти! Попробуй ещё раз');
-      this.score.update((score) => (score > 1 ? score - 1 : 0));
+      this.score.update((score) => (score > this.scoreIncrement ? score - this.scoreIncrement : 0));
       // Add to wrong answers list to disable/dim the button
       this.wrongAnswers.update((prev) => [...prev, value]);
       this.soundService.playFailure();
