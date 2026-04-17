@@ -12,14 +12,17 @@ import { StatsService } from '../../services/stats.service';
         <div class="flex flex-col gap-4">
           <input
             #nameInput
+            (input)="0" 
             type="text"
             placeholder="Как тебя зовут?"
             class="p-4 rounded-xl border-2 border-blue-400 outline-none text-2xl"
             (keyup.enter)="statsService.setUserName(nameInput.value)"
           />
+
           <button
+            [disabled]="!nameInput.value.trim()"
             (click)="statsService.setUserName(nameInput.value)"
-            class="bg-blue-500 text-white p-4 rounded-xl font-bold"
+            class="bg-blue-500 disabled:bg-gray-300 text-white p-4 rounded-xl font-bold"
           >
             Начать заниматься!
           </button>
@@ -29,7 +32,7 @@ import { StatsService } from '../../services/stats.service';
           <div class="flex justify-between items-center mb-10 bg-white p-4 rounded-2xl shadow-sm">
             <span class="text-lg font-medium text-gray-500"
               >Привет, <b class="text-blue-600">{{ statsService.currentUser }}</b
-              >!</span
+              >! 👋</span
             >
             <button
               (click)="statsService.logout()"
