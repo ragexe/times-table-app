@@ -1,35 +1,10 @@
-// import { Injectable, inject } from '@angular/core';
-// import { HttpClient } from '@angular/common/http';
-// import { BehaviorSubject, type Observable } from 'rxjs';
-
-// @Injectable({ providedIn: 'root' })
-// export class StatsService {
-//   private readonly httpClient = inject(HttpClient);
-//   private readonly GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/AKfycbya_jWb0rG6Zx3gWXSslNBqJiy9qdT4tRagZ16IiPD6_tOvTxU7al5CxxLSezVi7Co0/exec`;
-//   private readonly userName = new BehaviorSubject<string | null>(null);
-
-//   public sendResult(payload: {
-//     leftQuestion: number;
-//     rightQuestion: number;
-//     answer: number;
-//     isCorrect: boolean;
-//     currentScore: number;
-//     scoreChange: number;
-//   }): Observable<unknown> {
-//     return this.httpClient.post<unknown>(this.GOOGLE_SCRIPT_URL, {
-//       userName: this.userName.value,
-//       ...payload,
-//     });
-//   }
-// }
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly FORM_URL = `https://docs.google.com/forms/d/e/1FAIpQLSdOYpMrKFxTJgLZumz_w4IV876ow8WptdSLbelyh7pyv4QSEg/formResponse`;
-  private readonly userName = new BehaviorSubject<string | null>(null);
+  private readonly userName = new BehaviorSubject<string | null | undefined>(null);
 
   private readonly ENTRY_IDS = {
     userName: 'entry.86961848',
@@ -64,5 +39,16 @@ export class StatsService {
       mode: 'no-cors',
       body: formData,
     });
+  }
+
+  public isLoggedIn(): boolean {
+    return !(this.userName.value === null);
+  }
+
+  public setUserName(value: string | null | undefined): void {
+    if (value === null || value === undefined) return;
+    if (value === '') return;
+
+    this.userName.next(value);
   }
 }
