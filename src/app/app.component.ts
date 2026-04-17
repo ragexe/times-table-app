@@ -1,7 +1,4 @@
-/* eslint-disable no-plusplus -- Draft */
-/* eslint-disable @typescript-eslint/no-magic-numbers -- Draft */
-/* eslint-disable @typescript-eslint/explicit-function-return-type -- Draft */
-import { Component, type OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 

@@ -22,6 +22,7 @@ export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
   private readonly TIME_LIMIT = 4000;
   private readonly TICK_INTERVAL = 40;
+  private readonly OPTIONS_POOL_SIZE = 4;
   private timerSubscription?: Subscription;
 
   protected readonly numberLeft = signal(0);
@@ -50,24 +51,24 @@ export class GameComponent implements OnInit, OnDestroy {
    */
   private generateQuestion(): void {
     const tableValue = this.table();
+
     const base =
       tableValue === 'random' ? Math.floor(Math.random() * 8) + 2 : parseInt(tableValue, 10);
 
     this.numberLeft.set(base);
     this.numberRight.set(Math.floor(Math.random() * 8) + 2);
-
     const correctAnswer = this.numberLeft() * this.numberRight();
-    this.options.set(GameComponent.generateOptions(correctAnswer));
+    this.options.set(this.generateOptions(correctAnswer));
     this.startTimer();
   }
 
   /**
    * Creates a list of 4 unique options including the correct answer
    */
-  private static generateOptions(correct: number): number[] {
+  private generateOptions(correct: number): number[] {
     const set = new Set<number>([correct]);
 
-    while (set.size < 4) {
+    while (set.size < this.OPTIONS_POOL_SIZE) {
       const offset = Math.floor(Math.random() * 10) - 5;
       const wrong = correct + offset;
       if (wrong > 0 && wrong !== correct) set.add(wrong);
