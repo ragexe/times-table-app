@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { StatsService } from '../../services/stats';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-menu',

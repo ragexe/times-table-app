@@ -1,6 +1,6 @@
 import type { Routes } from '@angular/router';
 
-import { MenuComponent } from './components/menu/menu';
+import { MenuComponent } from './components/menu/menu.component';
 import { GameComponent } from './components/game/game.component';
 import { GAME_OPTIONS_SCORE_INCREMENT, GAME_TIME_LIMIT } from './tokens/game-config.token';
 import { authGuard } from './guards/auth.guard';

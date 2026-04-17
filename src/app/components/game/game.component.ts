@@ -10,8 +10,8 @@ import {
 import { RouterLink } from '@angular/router';
 import { tap, timer, type Subscription } from 'rxjs';
 
-import { SoundService } from '../../services/sound';
-import { StatsService } from '../../services/stats';
+import { SoundService } from '../../services/sound.service';
+import { StatsService } from '../../services/stats.service';
 import {
   GAME_OPTIONS_POOL_SIZE,
   GAME_OPTIONS_SCORE_INCREMENT,
