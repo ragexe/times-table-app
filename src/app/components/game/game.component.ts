@@ -1,20 +1,21 @@
 import {
   Component,
-  type OnInit,
   computed,
   inject,
   input,
   signal,
   type OnDestroy,
+  type OnInit,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { timer, type Subscription, tap } from 'rxjs';
+import { tap, timer, type Subscription } from 'rxjs';
 
 import { SoundService } from '../../services/sound';
+import { StatsService } from '../../services/stats';
 import {
-  GAME_TIME_LIMIT,
   GAME_OPTIONS_POOL_SIZE,
   GAME_OPTIONS_SCORE_INCREMENT,
+  GAME_TIME_LIMIT,
 } from '../../tokens/game-config.token';
 
 @Component({
@@ -25,6 +26,7 @@ import {
 })
 export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
+  private readonly statsService = inject(StatsService);
   private readonly timeLimit = inject(GAME_TIME_LIMIT);
   private readonly tickInterval = Math.floor(this.timeLimit / 100);
   private readonly optionsPoolSize = inject(GAME_OPTIONS_POOL_SIZE);
@@ -92,6 +94,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
     const isCorrect = value === this.numberLeft() * this.numberRight();
 
+    const initialScore = this.score();
+
     if (isCorrect) {
       this.score.update((score) => score + this.scoreIncrement);
       this.message.set('⭐ Правильно! Молодец!');
@@ -100,12 +104,24 @@ export class GameComponent implements OnInit, OnDestroy {
       this.soundService.playSuccess();
       this.stopTimer();
     } else {
-      this.message.set('❌ Ой, почти! Попробуй ещё раз');
       this.score.update((score) => (score > this.scoreIncrement ? score - this.scoreIncrement : 0));
+      this.message.set('❌ Ой, почти! Попробуй ещё раз');
       // Add to wrong answers list to disable/dim the button
       this.wrongAnswers.update((prev) => [...prev, value]);
       this.soundService.playFailure();
     }
+
+    // No need to send data if it's training
+    if (this.scoreIncrement === 0) return;
+
+    void this.statsService.sendResult({
+      leftQuestion: Math.min(this.numberLeft(), this.numberRight()),
+      rightQuestion: Math.max(this.numberLeft(), this.numberRight()),
+      answer: value,
+      isCorrect,
+      currentScore: this.score(),
+      scoreChange: this.score() - initialScore,
+    });
   }
 
   protected nextQuestion(): void {
