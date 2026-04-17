@@ -18,8 +18,20 @@
         alt="Robux"
         width="30"
         height="30"
-      /> {{ score() }}
+      />
+      {{ score() }}
     </div>
+  </div>
+
+  <!-- Progress Bar Container -->
+  <div class="w-full max-w-md h-4 bg-gray-200 rounded-full mb-4 overflow-hidden shadow-inner">
+    <div
+      class="h-full transition-all ease-linear duration-75"
+      [style.width.%]="progressWidth()"
+      [class.bg-green-400]="progressWidth() > 50"
+      [class.bg-yellow-400]="progressWidth() <= 50 && progressWidth() > 20"
+      [class.bg-red-500]="progressWidth() <= 20"
+    ></div>
   </div>
 
   <!-- Game Card -->

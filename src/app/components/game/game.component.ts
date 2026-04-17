@@ -1,9 +1,16 @@
-import { Component, type OnInit, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  type OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+  type OnDestroy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { timer, type Subscription, tap } from 'rxjs';
 
 import { SoundService } from '../../services/sound';
-
-type GameMode = 'training' | 'test';
 
 @Component({
   selector: 'app-game',
@@ -11,8 +18,11 @@ type GameMode = 'training' | 'test';
   imports: [RouterLink],
   templateUrl: './game.component.html',
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
+  private readonly TIME_LIMIT = 4000;
+  private readonly TICK_INTERVAL = 10;
+  private timerSubscription?: Subscription;
 
   protected readonly numberLeft = signal(0);
   protected readonly numberRight = signal(0);
@@ -22,15 +32,17 @@ export class GameComponent implements OnInit {
   protected readonly isAnswered = signal(false);
   protected readonly wrongAnswers = signal<number[]>([]);
   protected readonly correctAnswers = signal<number[]>([]);
+  protected readonly timeLeft = signal(this.TIME_LIMIT);
+  protected readonly progressWidth = computed(() => (this.timeLeft() / this.TIME_LIMIT) * 100);
 
   public readonly table = input.required<string>();
 
-  public readonly mode = input<GameMode, string | null | undefined>('training', {
-    transform: (inputValue) => (inputValue === 'test' ? 'test' : 'training'),
-  });
-
   ngOnInit(): void {
     this.generateQuestion();
+  }
+
+  ngOnDestroy(): void {
+    this.stopTimer();
   }
 
   /**
@@ -46,6 +58,7 @@ export class GameComponent implements OnInit {
 
     const correctAnswer = this.numberLeft() * this.numberRight();
     this.options.set(GameComponent.generateOptions(correctAnswer));
+    this.startTimer();
   }
 
   /**
@@ -53,11 +66,13 @@ export class GameComponent implements OnInit {
    */
   private static generateOptions(correct: number): number[] {
     const set = new Set<number>([correct]);
+
     while (set.size < 4) {
       const offset = Math.floor(Math.random() * 10) - 5;
       const wrong = correct + offset;
       if (wrong > 0 && wrong !== correct) set.add(wrong);
     }
+
     return Array.from(set).sort(() => Math.random() - 0.5);
   }
 
@@ -76,6 +91,7 @@ export class GameComponent implements OnInit {
       this.isAnswered.set(true);
       this.correctAnswers.update((prev) => [...prev, value]);
       this.soundService.playSuccess();
+      this.stopTimer();
     } else {
       this.message.set('❌ Ой, почти! Попробуй ещё раз');
       this.score.update((score) => (score > 1 ? score - 1 : 0));
@@ -92,5 +108,35 @@ export class GameComponent implements OnInit {
     this.correctAnswers.set([]);
     this.message.set('Выбери правильный ответ:');
     this.generateQuestion();
+  }
+
+  private startTimer(): void {
+    this.stopTimer();
+    this.timeLeft.set(this.TIME_LIMIT);
+    this.soundService.playTikTak();
+
+    this.timerSubscription = timer(0, this.TICK_INTERVAL)
+      .pipe(
+        tap(() => {
+          this.timeLeft.update((time) => time - this.TICK_INTERVAL);
+
+          if (this.timeLeft() <= 0) {
+            this.stopTimer();
+            this.handleTimeOut();
+          }
+        }),
+      )
+      .subscribe();
+  }
+
+  private stopTimer(): void {
+    this.soundService.stopTikTak();
+    this.timerSubscription?.unsubscribe();
+  }
+
+  private handleTimeOut(): void {
+    if (!this.isAnswered()) {
+      this.message.set('⏰ Время вышло!');
+    }
   }
 }
