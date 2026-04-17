@@ -26,17 +26,16 @@ import {
 })
 export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
-  private readonly statsService = inject(StatsService);
   private readonly timeLimit = inject(GAME_TIME_LIMIT);
   private readonly tickInterval = Math.floor(this.timeLimit / 100);
   private readonly optionsPoolSize = inject(GAME_OPTIONS_POOL_SIZE);
   private readonly scoreIncrement = inject(GAME_OPTIONS_SCORE_INCREMENT);
   private timerSubscription?: Subscription;
-
+  
+  protected readonly statsService = inject(StatsService);
   protected readonly numberLeft = signal(0);
   protected readonly numberRight = signal(0);
   protected readonly options = signal<number[]>([]);
-  protected readonly score = signal(0);
   protected readonly message = signal('Приготовься...');
   protected readonly isAnswered = signal(false);
   protected readonly wrongAnswers = signal<number[]>([]);
@@ -94,17 +93,17 @@ export class GameComponent implements OnInit, OnDestroy {
 
     const isCorrect = value === this.numberLeft() * this.numberRight();
 
-    const initialScore = this.score();
+    const initialScore = this.statsService.totalScore();
 
     if (isCorrect) {
-      this.score.update((score) => score + this.scoreIncrement);
+      this.statsService.updateScore(this.scoreIncrement)
       this.message.set('⭐ Правильно! Молодец!');
       this.isAnswered.set(true);
       this.correctAnswers.update((prev) => [...prev, value]);
       this.soundService.playSuccess();
       this.stopTimer();
     } else {
-      this.score.update((score) => (score > this.scoreIncrement ? score - this.scoreIncrement : 0));
+      this.statsService.updateScore(-1 * this.scoreIncrement)
       this.message.set('❌ Ой, почти! Попробуй ещё раз');
       // Add to wrong answers list to disable/dim the button
       this.wrongAnswers.update((prev) => [...prev, value]);
@@ -119,8 +118,8 @@ export class GameComponent implements OnInit, OnDestroy {
       rightQuestion: Math.max(this.numberLeft(), this.numberRight()),
       answer: value,
       isCorrect,
-      currentScore: this.score(),
-      scoreChange: this.score() - initialScore,
+      currentScore: this.statsService.totalScore(),
+      scoreChange: this.statsService.totalScore() - initialScore,
     });
   }
 

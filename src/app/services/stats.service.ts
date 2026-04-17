@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { computed, effect, Injectable, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly FORM_URL = `https://docs.google.com/forms/d/e/1FAIpQLSdOYpMrKFxTJgLZumz_w4IV876ow8WptdSLbelyh7pyv4QSEg/formResponse`;
-  private readonly USER_NAME_STORAGE_KEY = 'times-table-app_user-name';
 
-  private readonly userName$ = new BehaviorSubject<string | null | undefined>(
-    localStorage.getItem(this.USER_NAME_STORAGE_KEY) ?? null,
-  );
+  private readonly USER_KEY = 'math_app_current_user';
+  private readonly RECORDS_KEY = 'math_app_all_records';
+
+  public readonly userName = signal<string | null>(localStorage.getItem(this.USER_KEY));
+  public readonly totalScore = signal<number>(0);
 
   private readonly ENTRY_IDS = {
     userName: 'entry.86961848',
@@ -21,7 +21,30 @@ export class StatsService {
   };
 
   public get currentUser(): string | null | undefined {
-    return this.userName$.value ?? '👺';
+    return this.userName() ?? '👺';
+  }
+
+  constructor() {
+    this.restoreScoreForUser(this.userName());
+
+    effect(() => {
+      const name = this.userName();
+
+      if (name === null) {
+        localStorage.removeItem(this.USER_KEY);
+      } else {
+        localStorage.setItem(this.USER_KEY, name);
+      }
+    });
+
+    effect(() => {
+      const name = this.userName();
+      const score = this.totalScore();
+
+      if (name === null) return;
+
+      this.saveScoreToRegistry(name, score);
+    });
   }
 
   public async sendResult(payload: {
@@ -33,7 +56,7 @@ export class StatsService {
     scoreChange: number;
   }): Promise<unknown> {
     const formData = new FormData();
-    formData.append(this.ENTRY_IDS.userName, this.userName$.value ?? 'Guest');
+    formData.append(this.ENTRY_IDS.userName, this.userName() ?? 'Guest');
     formData.append(this.ENTRY_IDS.leftQuestion, payload.leftQuestion.toString());
     formData.append(this.ENTRY_IDS.rightQuestion, payload.rightQuestion.toString());
     formData.append(this.ENTRY_IDS.answer, payload.answer.toString());
@@ -49,21 +72,44 @@ export class StatsService {
     });
   }
 
-  public isLoggedIn(): boolean {
-    return !(this.userName$.value === null);
-  }
+  public readonly isLoggedIn = computed(() => !(this.userName() === null));
 
-  public setUserName(value: string | null | undefined): void {
-    const userName = value?.trim() ?? null;
+  public setUserName(name: string | null | undefined): void {
+    const trimmed = name?.trim() ?? null;
+    if (trimmed === null) return;
 
-    if (userName === null) return;
-
-    localStorage.setItem(this.USER_NAME_STORAGE_KEY, userName);
-    this.userName$.next(userName);
+    this.userName.set(trimmed);
+    this.restoreScoreForUser(trimmed);
   }
 
   public logout(): void {
-    localStorage.removeItem(this.USER_NAME_STORAGE_KEY);
-    this.userName$.next(null);
+    this.userName.set(null);
+    this.totalScore.set(0);
+  }
+
+  private saveScoreToRegistry(userName: string, score: number): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- TODO: Data validation
+    const records = JSON.parse(localStorage.getItem(this.RECORDS_KEY) ?? '{}') as unknown as Record<
+      string,
+      number
+    >;
+    records[userName] = score;
+    localStorage.setItem(this.RECORDS_KEY, JSON.stringify(records));
+  }
+
+  private restoreScoreForUser(name: string | null): void {
+    if (name === null) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- TODO: Data validation
+    const records = JSON.parse(localStorage.getItem(this.RECORDS_KEY) ?? '{}') as unknown as Record<
+      string,
+      number
+    >;
+
+    this.totalScore.set(records[name] ?? 0);
+  }
+
+  public updateScore(delta: number): void {
+    this.totalScore.update((score) => Math.max(0, score + delta));
   }
 }
