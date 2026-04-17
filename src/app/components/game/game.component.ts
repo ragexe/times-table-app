@@ -31,7 +31,7 @@ export class GameComponent implements OnInit, OnDestroy {
   private readonly optionsPoolSize = inject(GAME_OPTIONS_POOL_SIZE);
   private readonly scoreIncrement = inject(GAME_OPTIONS_SCORE_INCREMENT);
   private timerSubscription?: Subscription;
-  
+
   protected readonly statsService = inject(StatsService);
   protected readonly numberLeft = signal(0);
   protected readonly numberRight = signal(0);
@@ -96,14 +96,17 @@ export class GameComponent implements OnInit, OnDestroy {
     const initialScore = this.statsService.totalScore();
 
     if (isCorrect) {
-      this.statsService.updateScore(this.scoreIncrement)
+      if (this.timeLeft() > 0 || this.timeLimit === 0) {
+        this.statsService.updateScore(this.scoreIncrement);
+      }
+
       this.message.set('⭐ Правильно! Молодец!');
       this.isAnswered.set(true);
       this.correctAnswers.update((prev) => [...prev, value]);
       this.soundService.playSuccess();
       this.stopTimer();
     } else {
-      this.statsService.updateScore(-1 * this.scoreIncrement)
+      this.statsService.updateScore(-1 * this.scoreIncrement);
       this.message.set('❌ Ой, почти! Попробуй ещё раз');
       // Add to wrong answers list to disable/dim the button
       this.wrongAnswers.update((prev) => [...prev, value]);
