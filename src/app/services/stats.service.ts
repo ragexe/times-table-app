@@ -4,7 +4,11 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly FORM_URL = `https://docs.google.com/forms/d/e/1FAIpQLSdOYpMrKFxTJgLZumz_w4IV876ow8WptdSLbelyh7pyv4QSEg/formResponse`;
-  private readonly userName = new BehaviorSubject<string | null | undefined>(null);
+  private readonly USER_NAME_STORAGE_KEY = 'times-table-app_user-name';
+
+  private readonly userName$ = new BehaviorSubject<string | null | undefined>(
+    localStorage.getItem(this.USER_NAME_STORAGE_KEY) ?? null,
+  );
 
   private readonly ENTRY_IDS = {
     userName: 'entry.86961848',
@@ -16,6 +20,10 @@ export class StatsService {
     scoreChange: 'entry.1813684527',
   };
 
+  public get currentUser(): string | null | undefined {
+    return this.userName$.value ?? '👺';
+  }
+
   public async sendResult(payload: {
     leftQuestion: number;
     rightQuestion: number;
@@ -25,7 +33,7 @@ export class StatsService {
     scoreChange: number;
   }): Promise<unknown> {
     const formData = new FormData();
-    formData.append(this.ENTRY_IDS.userName, this.userName.value ?? 'Guest');
+    formData.append(this.ENTRY_IDS.userName, this.userName$.value ?? 'Guest');
     formData.append(this.ENTRY_IDS.leftQuestion, payload.leftQuestion.toString());
     formData.append(this.ENTRY_IDS.rightQuestion, payload.rightQuestion.toString());
     formData.append(this.ENTRY_IDS.answer, payload.answer.toString());
@@ -42,13 +50,20 @@ export class StatsService {
   }
 
   public isLoggedIn(): boolean {
-    return !(this.userName.value === null);
+    return !(this.userName$.value === null);
   }
 
   public setUserName(value: string | null | undefined): void {
-    if (value === null || value === undefined) return;
-    if (value === '') return;
+    const userName = value?.trim() ?? null;
 
-    this.userName.next(value);
+    if (userName === null) return;
+
+    localStorage.setItem(this.USER_NAME_STORAGE_KEY, userName);
+    this.userName$.next(userName);
+  }
+
+  public logout(): void {
+    localStorage.removeItem(this.USER_NAME_STORAGE_KEY);
+    this.userName$.next(null);
   }
 }

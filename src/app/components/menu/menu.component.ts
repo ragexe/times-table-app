@@ -15,6 +15,7 @@ import { StatsService } from '../../services/stats.service';
             type="text"
             placeholder="Как тебя зовут?"
             class="p-4 rounded-xl border-2 border-blue-400 outline-none text-2xl"
+            (keyup.enter)="statsService.setUserName(nameInput.value)"
           />
           <button
             (click)="statsService.setUserName(nameInput.value)"
@@ -24,6 +25,21 @@ import { StatsService } from '../../services/stats.service';
           </button>
         </div>
       } @else {
+        <div class="text-center w-full max-w-2xl">
+          <div class="flex justify-between items-center mb-10 bg-white p-4 rounded-2xl shadow-sm">
+            <span class="text-lg font-medium text-gray-500"
+              >Привет, <b class="text-blue-600">{{ statsService.currentUser }}</b
+              >!</span
+            >
+            <button
+              (click)="statsService.logout()"
+              class="text-sm text-red-400 hover:text-red-600 underline"
+            >
+              Это не я
+            </button>
+          </div>
+        </div>
+
         <h1 class="text-4xl font-bold text-blue-600 mb-10 text-center">Таблица умножения</h1>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
