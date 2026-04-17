@@ -18,7 +18,7 @@ import { RouterLink } from '@angular/router';
         }
       </div>
 
-      <button [routerLink]="['/game', 'random']" 
+      <button [routerLink]="['/challenge', 'random']" 
         class="mt-12 px-10 py-5 text-2xl font-bold bg-green-500 text-white rounded-2xl shadow-lg hover:bg-green-600 transition-all">
         🎲 Вразнобой
       </button>

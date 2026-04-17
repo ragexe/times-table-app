@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 import { timer, type Subscription, tap } from 'rxjs';
 
 import { SoundService } from '../../services/sound';
+import { GAME_TIME_LIMIT, GAME_OPTIONS_POOL_SIZE } from '../../tokens/game-config.token';
 
 @Component({
   selector: 'app-game',
@@ -20,9 +21,9 @@ import { SoundService } from '../../services/sound';
 })
 export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
-  private readonly TIME_LIMIT = 4000;
-  private readonly TICK_INTERVAL = 40;
-  private readonly OPTIONS_POOL_SIZE = 4;
+  private readonly timeLimit = inject(GAME_TIME_LIMIT);
+  private readonly tickInterval = Math.floor(this.timeLimit / 100);
+  private readonly optionsPoolSize = inject(GAME_OPTIONS_POOL_SIZE);
   private timerSubscription?: Subscription;
 
   protected readonly numberLeft = signal(0);
@@ -33,8 +34,8 @@ export class GameComponent implements OnInit, OnDestroy {
   protected readonly isAnswered = signal(false);
   protected readonly wrongAnswers = signal<number[]>([]);
   protected readonly correctAnswers = signal<number[]>([]);
-  protected readonly timeLeft = signal(this.TIME_LIMIT);
-  protected readonly progressWidth = computed(() => (this.timeLeft() / this.TIME_LIMIT) * 100);
+  protected readonly timeLeft = signal(this.timeLimit);
+  protected readonly progressWidth = computed(() => (this.timeLeft() / this.timeLimit) * 100);
 
   public readonly table = input.required<string>();
 
@@ -68,7 +69,7 @@ export class GameComponent implements OnInit, OnDestroy {
   private generateOptions(correct: number): number[] {
     const set = new Set<number>([correct]);
 
-    while (set.size < this.OPTIONS_POOL_SIZE) {
+    while (set.size < this.optionsPoolSize) {
       const offset = Math.floor(Math.random() * 10) - 5;
       const wrong = correct + offset;
       if (wrong > 0 && wrong !== correct) set.add(wrong);
@@ -112,14 +113,17 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   private startTimer(): void {
+    if (this.timeLimit === 0) return;
+    if (!Number.isSafeInteger(this.timeLimit)) return;
+
     this.stopTimer();
-    this.timeLeft.set(this.TIME_LIMIT);
+    this.timeLeft.set(this.timeLimit);
     this.soundService.playTikTak();
 
-    this.timerSubscription = timer(0, this.TICK_INTERVAL)
+    this.timerSubscription = timer(0, this.tickInterval)
       .pipe(
         tap(() => {
-          this.timeLeft.update((time) => time - this.TICK_INTERVAL);
+          this.timeLeft.update((time) => time - this.tickInterval);
 
           if (this.timeLeft() <= 0) {
             this.stopTimer();
