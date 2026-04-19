@@ -8,16 +8,22 @@ export class SoundService {
   private readonly airBurstSound = new Audio('sounds/air-burst.ogg');
   private readonly failureSound = new Audio('sounds/failure.ogg');
   private readonly tikTakSound = new Audio('sounds/tik-tak.ogg');
+  private readonly randomClickSound = new Audio('sounds/random-click.ogg');
 
   constructor() {
     this.successSound.volume = 0.5;
     this.airBurstSound.volume = 0.4;
     this.failureSound.volume = 0.4;
     this.tikTakSound.volume = 0.3;
+    this.randomClickSound.volume = 0.5;
   }
 
   public playSuccess(): void {
     SoundService.playSound(this.successSound);
+  }
+
+  public playRandomClick(): void {
+    SoundService.playSound(this.randomClickSound);
   }
 
   public playAirBurst(): void {
