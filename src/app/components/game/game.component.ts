@@ -152,11 +152,10 @@ export class GameComponent implements OnInit, OnDestroy {
     void this.statsService.sendResult({
       leftQuestion: Math.min(this.numberLeft(), this.numberRight()),
       rightQuestion: Math.max(this.numberLeft(), this.numberRight()),
-      answer: value,
+      answer: this.answer() ?? 0,
       isCorrect,
       currentScore: this.statsService.totalScore(),
       scoreChange: this.statsService.totalScore() - initialScore,
-      operation: this.activeOperation(),
     });
   }
 

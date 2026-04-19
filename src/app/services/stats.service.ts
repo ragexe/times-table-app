@@ -54,7 +54,6 @@ export class StatsService {
     isCorrect: boolean;
     currentScore: number;
     scoreChange: number;
-    operation: string;
   }): Promise<unknown> {
     const formData = new FormData();
     formData.append(this.ENTRY_IDS.userName, this.userName() ?? 'Guest');
@@ -64,7 +63,6 @@ export class StatsService {
     formData.append(this.ENTRY_IDS.isCorrect, payload.isCorrect.toString());
     formData.append(this.ENTRY_IDS.currentScore, payload.currentScore.toString());
     formData.append(this.ENTRY_IDS.scoreChange, payload.scoreChange.toString());
-    // formData.append(this.ENTRY_IDS.operation, payload.operation.toString());
     formData.append('submissionTimestamp', `${+new Date()}`);
 
     return await fetch(this.FORM_URL, {
