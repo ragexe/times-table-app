@@ -17,6 +17,7 @@ import {
   GAME_OPTIONS_SCORE_INCREMENT,
   GAME_TIME_LIMIT,
 } from '../../tokens/game-config.token';
+import type { GameOperation } from '../../models/GameOperation';
 
 @Component({
   selector: 'app-game',
@@ -32,9 +33,13 @@ export class GameComponent implements OnInit, OnDestroy {
   private readonly scoreIncrement = inject(GAME_OPTIONS_SCORE_INCREMENT);
   private timerSubscription?: Subscription;
 
+  protected readonly table = input.required<string>();
+  protected readonly operation = input<GameOperation>('multiplication');
+
   protected readonly statsService = inject(StatsService);
   protected readonly numberLeft = signal(0);
   protected readonly numberRight = signal(0);
+  protected readonly answer = signal<number | null>(null);
   protected readonly options = signal<number[]>([]);
   protected readonly message = signal('Приготовься...');
   protected readonly isAnswered = signal(false);
@@ -42,8 +47,7 @@ export class GameComponent implements OnInit, OnDestroy {
   protected readonly correctAnswers = signal<number[]>([]);
   protected readonly timeLeft = signal(this.timeLimit);
   protected readonly progressWidth = computed(() => (this.timeLeft() / this.timeLimit) * 100);
-
-  public readonly table = input.required<string>();
+  protected readonly activeOperation = signal<GameOperation>('multiplication');
 
   ngOnInit(): void {
     this.generateQuestion();
@@ -54,18 +58,47 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Generates a new multiplication task based on the selected mode
+   * Generates a new division/multiplication task based on the selected mode
    */
   private generateQuestion(): void {
     const tableValue = this.table();
+    const operationValue = this.operation();
 
     const base =
       tableValue === 'random' ? Math.floor(Math.random() * 8) + 2 : parseInt(tableValue, 10);
 
-    this.numberLeft.set(base);
-    this.numberRight.set(Math.floor(Math.random() * 8) + 2);
-    const correctAnswer = this.numberLeft() * this.numberRight();
-    this.options.set(this.generateOptions(correctAnswer));
+    if (tableValue === 'random') {
+      this.activeOperation.set(Math.random() > 0.5 ? 'multiplication' : 'division');
+    } else {
+      this.activeOperation.set(operationValue);
+    }
+
+    const factor2 = Math.floor(Math.random() * 8) + 2;
+    const product = base * factor2;
+    const operation = this.activeOperation();
+
+    switch (operation) {
+      case 'division':
+        this.numberLeft.set(product);
+        this.numberRight.set(base);
+        this.options.set(this.generateOptions(factor2));
+        this.answer.set(factor2);
+        break;
+
+      case 'multiplication':
+        this.numberLeft.set(base);
+        this.numberRight.set(factor2);
+        this.options.set(this.generateOptions(product));
+        this.answer.set(product);
+        break;
+
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check -- Manual exhaustive check
+      default: {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Manual exhaustive check
+        const exhaustiveCheck: never = operation;
+      }
+    }
+
     this.startTimer();
   }
 
@@ -91,7 +124,7 @@ export class GameComponent implements OnInit, OnDestroy {
     // If already answered correctly, ignore further clicks
     if (this.isAnswered()) return;
 
-    const isCorrect = value === this.numberLeft() * this.numberRight();
+    const isCorrect = value === this.answer();
 
     const initialScore = this.statsService.totalScore();
 
@@ -123,6 +156,7 @@ export class GameComponent implements OnInit, OnDestroy {
       isCorrect,
       currentScore: this.statsService.totalScore(),
       scoreChange: this.statsService.totalScore() - initialScore,
+      operation: this.activeOperation(),
     });
   }
 

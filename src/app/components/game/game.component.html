@@ -45,7 +45,14 @@
 
     <!-- Equation -->
     <div class="text-7xl font-black text-blue-600 mb-10 tracking-tight">
-      {{ numberLeft() }} <span class="text-red-500">×</span> {{ numberRight() }}
+      {{ numberLeft() }}
+      <span
+        [class.text-red-500]="activeOperation() === 'multiplication'"
+        [class.text-purple-500]="activeOperation() === 'division'"
+      >
+        {{ activeOperation() === 'multiplication' ? '×' : '÷' }}
+      </span>
+      {{ numberRight() }}
     </div>
 
     <!-- Answer Grid -->

@@ -1,18 +1,20 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { StatsService } from '../../services/stats.service';
+import type { GameOperation } from '../../models/GameOperation';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
   imports: [RouterLink],
+  // TODO: Move to separate file
   template: `
     <div class="flex flex-col items-center justify-center min-h-screen p-4">
       @if (!statsService.isLoggedIn()) {
         <div class="flex flex-col gap-4">
           <input
             #nameInput
-            (input)="0" 
+            (input)="(0)"
             type="text"
             placeholder="Как тебя зовут?"
             class="p-4 rounded-xl border-2 border-blue-400 outline-none text-2xl"
@@ -28,12 +30,42 @@ import { StatsService } from '../../services/stats.service';
           </button>
         </div>
       } @else {
+        <!-- Game mode -->
+        <div class="flex justify-center mb-8">
+          <div class="inline-flex p-1 bg-white border-4 border-blue-200 rounded-3xl shadow-inner">
+            <!-- Multiplication -->
+            <button
+              (click)="setOperation('multiplication')"
+              [class.bg-blue-500]="currentOperation() === 'multiplication'"
+              [class.text-white]="currentOperation() === 'multiplication'"
+              [class.shadow-lg]="currentOperation() === 'multiplication'"
+              class="flex items-center gap-3 px-8 py-4 rounded-2xl transition-all duration-300 font-black text-2xl"
+            >
+              <span class="text-3xl">×</span>
+              <span>Умножение</span>
+            </button>
+
+            <!-- Division -->
+            <button
+              (click)="setOperation('division')"
+              [class.bg-purple-500]="currentOperation() === 'division'"
+              [class.text-white]="currentOperation() === 'division'"
+              [class.shadow-lg]="currentOperation() === 'division'"
+              class="flex items-center gap-3 px-8 py-4 rounded-2xl transition-all duration-300 font-black text-2xl"
+            >
+              <span class="text-3xl">÷</span>
+              <span>Деление</span>
+            </button>
+          </div>
+        </div>
+
         <div class="text-center w-full max-w-2xl">
           <div class="flex justify-between items-center mb-10 bg-white p-4 rounded-2xl shadow-sm">
             <span class="text-lg font-medium text-gray-500"
               >Привет, <b class="text-blue-600">{{ statsService.currentUser }}</b
               >! 👋</span
             >
+            <!-- TODO: Add score -->
             <button
               (click)="statsService.logout()"
               class="text-sm text-red-400 hover:text-red-600 underline"
@@ -45,11 +77,14 @@ import { StatsService } from '../../services/stats.service';
 
         <h1 class="text-4xl font-bold text-blue-600 mb-10 text-center">Таблица умножения</h1>
 
+        <!-- Tables grid -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
           @for (num of tables; track num) {
             <button
-              [routerLink]="['/game', num]"
-              class="w-24 h-24 text-3xl font-black rounded-full bg-yellow-400 text-white shadow-xl hover:bg-yellow-500 transition-all active:scale-90 border-4 border-yellow-200"
+              [routerLink]="['/game', currentOperation(), num]"
+              [class.bg-blue-400]="currentOperation() === 'multiplication'"
+              [class.bg-purple-400]="currentOperation() === 'division'"
+              class="w-24 h-24 text-4xl font-black rounded-3xl text-white shadow-xl hover:scale-110 transition-transform border-b-8 border-black/20 active:border-b-0"
             >
               {{ num }}
             </button>
@@ -57,7 +92,7 @@ import { StatsService } from '../../services/stats.service';
         </div>
 
         <button
-          [routerLink]="['/challenge', 'random']"
+          [routerLink]="['/challenge', currentOperation(), 'random']"
           class="mt-12 px-10 py-5 text-2xl font-bold bg-green-500 text-white rounded-2xl shadow-lg hover:bg-green-600 transition-all"
         >
           🎲 Вразнобой
@@ -68,6 +103,12 @@ import { StatsService } from '../../services/stats.service';
 })
 export class MenuComponent {
   // Available tables to practice
-  protected tables = [2, 3, 4, 5, 6, 7, 8, 9];
+  protected readonly tables = [2, 3, 4, 5, 6, 7, 8, 9];
   protected readonly statsService = inject(StatsService);
+  protected readonly currentOperation = signal<GameOperation>('multiplication');
+
+  protected setOperation(gameOperation: GameOperation): void {
+    // TODO: Add sound effect
+    this.currentOperation.set(gameOperation);
+  }
 }

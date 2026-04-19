@@ -8,7 +8,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', component: MenuComponent },
   {
-    path: 'game/:table',
+    path: 'game/:operation/:table',
     component: GameComponent,
     providers: [
       { provide: GAME_TIME_LIMIT, useValue: 0 },
@@ -17,7 +17,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'challenge/:table',
+    path: 'challenge/:operation/:table',
     component: GameComponent,
     canActivate: [authGuard],
   },
