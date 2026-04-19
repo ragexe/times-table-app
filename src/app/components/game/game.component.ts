@@ -150,9 +150,9 @@ export class GameComponent implements OnInit, OnDestroy {
     if (this.scoreIncrement === 0) return;
 
     void this.statsService.sendResult({
-      leftQuestion: Math.min(this.numberLeft(), this.numberRight()),
-      rightQuestion: Math.max(this.numberLeft(), this.numberRight()),
-      answer: this.answer() ?? 0,
+      leftQuestion: this.activeOperation(),
+      rightQuestion: `${this.numberLeft()} ${this.numberRight()}`,
+      answer: value,
       isCorrect,
       currentScore: this.statsService.totalScore(),
       scoreChange: this.statsService.totalScore() - initialScore,

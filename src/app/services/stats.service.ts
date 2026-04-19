@@ -48,8 +48,8 @@ export class StatsService {
   }
 
   public async sendResult(payload: {
-    leftQuestion: number;
-    rightQuestion: number;
+    leftQuestion: string;
+    rightQuestion: string;
     answer: number;
     isCorrect: boolean;
     currentScore: number;
@@ -57,8 +57,8 @@ export class StatsService {
   }): Promise<unknown> {
     const formData = new FormData();
     formData.append(this.ENTRY_IDS.userName, this.userName() ?? 'Guest');
-    formData.append(this.ENTRY_IDS.leftQuestion, payload.leftQuestion.toString());
-    formData.append(this.ENTRY_IDS.rightQuestion, payload.rightQuestion.toString());
+    formData.append(this.ENTRY_IDS.leftQuestion, payload.leftQuestion);
+    formData.append(this.ENTRY_IDS.rightQuestion, payload.rightQuestion);
     formData.append(this.ENTRY_IDS.answer, payload.answer.toString());
     formData.append(this.ENTRY_IDS.isCorrect, payload.isCorrect.toString());
     formData.append(this.ENTRY_IDS.currentScore, payload.currentScore.toString());
