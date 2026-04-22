@@ -1,0 +1,21 @@
+@keyframes score-up {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.5); }
+  100% { transform: scale(1); }
+}
+
+@keyframes score-down {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); color: #ef4444; }
+  75% { transform: translateX(5px); color: #ef4444; }
+}
+
+.animate-up {
+  display: inline-block;
+  animation: score-up 0.4s ease-out;
+}
+
+.animate-down {
+  display: inline-block;
+  animation: score-down 0.4s ease-out;
+}

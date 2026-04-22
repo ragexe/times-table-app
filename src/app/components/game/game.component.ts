@@ -24,6 +24,7 @@ import type { GameOperation } from '../../models/GameOperation';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './game.component.html',
+  styleUrls: ['./game.component.scss'],
 })
 export class GameComponent implements OnInit, OnDestroy {
   private readonly soundService = inject(SoundService);
@@ -48,6 +49,7 @@ export class GameComponent implements OnInit, OnDestroy {
   protected readonly timeLeft = signal(this.timeLimit);
   protected readonly progressWidth = computed(() => (this.timeLeft() / this.timeLimit) * 100);
   protected readonly activeOperation = signal<GameOperation>('multiplication');
+  protected readonly scoreEffect = signal<'up' | 'down' | 'none'>('none');
 
   ngOnInit(): void {
     this.generateQuestion();
@@ -131,6 +133,7 @@ export class GameComponent implements OnInit, OnDestroy {
     if (isCorrect) {
       if (this.timeLeft() > 0 || this.timeLimit === 0) {
         this.statsService.updateScore(this.scoreIncrement);
+        this.triggerEffect('up');
       }
 
       this.message.set('⭐ Правильно! Молодец!');
@@ -140,6 +143,8 @@ export class GameComponent implements OnInit, OnDestroy {
       this.stopTimer();
     } else {
       this.statsService.updateScore(-1 * this.scoreIncrement);
+      this.triggerEffect('down');
+
       this.message.set('❌ Ой, почти! Попробуй ещё раз');
       // Add to wrong answers list to disable/dim the button
       this.wrongAnswers.update((prev) => [...prev, value]);
@@ -199,5 +204,11 @@ export class GameComponent implements OnInit, OnDestroy {
     if (!this.isAnswered()) {
       this.message.set('⏰ Время вышло! Нужно быстрее');
     }
+  }
+
+  private triggerEffect(type: 'up' | 'down'): void {
+    this.scoreEffect.set(type);
+    // Сбрасываем через 400мс, чтобы класс удалился и анимацию можно было запустить снова
+    setTimeout(() => this.scoreEffect.set('none'), 400);
   }
 }
