@@ -31,15 +31,20 @@
     </div>
 
     <!-- Equation -->
-    <div class="text-7xl font-black text-blue-600 mb-10 tracking-tight">
-      {{ numberLeft() }}
-      <span
-        [class.text-red-500]="activeOperation() === 'multiplication'"
-        [class.text-purple-500]="activeOperation() === 'division'"
+    <div class="mb-10 text-center px-2">
+      <div
+        class="text-4xl sm:text-6xl md:text-7xl font-black text-blue-600 tracking-tighter flex items-center justify-center gap-2 flex-wrap"
       >
-        {{ activeOperation() === 'multiplication' ? '×' : '÷' }}
-      </span>
-      {{ numberRight() }}
+        <span>{{ numberLeft() }}</span>
+        <span
+          [class.text-red-500]="activeOperation() === 'multiplication'"
+          [class.text-purple-500]="activeOperation() === 'division'"
+          class="mx-1"
+        >
+          {{ activeOperation() === 'multiplication' ? '×' : '÷' }}
+        </span>
+        <span>{{ numberRight() }}</span>
+      </div>
     </div>
 
     <!-- Answer Grid -->
