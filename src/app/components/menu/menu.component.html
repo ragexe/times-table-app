@@ -20,17 +20,18 @@
     </div>
   } @else {
     <!-- Game mode -->
-    <div class="flex justify-center mb-8">
-      <div class="inline-flex p-1 bg-white border-4 border-blue-200 rounded-3xl shadow-inner">
+    <div class="flex justify-center mb-8 w-full max-w-sm mx-auto">
+      <div
+        class="flex flex-wrap sm:flex-nowrap p-1.5 bg-white border-4 border-blue-200 rounded-3xl shadow-inner w-full justify-center gap-1"
+      >
         <!-- Multiplication -->
         <button
           (click)="setOperation('multiplication')"
           [class.bg-blue-500]="currentOperation() === 'multiplication'"
           [class.text-white]="currentOperation() === 'multiplication'"
-          [class.shadow-lg]="currentOperation() === 'multiplication'"
-          class="flex items-center gap-3 px-8 py-4 rounded-2xl transition-all duration-300 font-black text-2xl"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 font-black text-lg sm:text-2xl min-w-[140px]"
         >
-          <span class="text-3xl">×</span>
+          <span class="text-2xl">×</span>
           <span>Умножение</span>
         </button>
 
@@ -39,10 +40,9 @@
           (click)="setOperation('division')"
           [class.bg-purple-500]="currentOperation() === 'division'"
           [class.text-white]="currentOperation() === 'division'"
-          [class.shadow-lg]="currentOperation() === 'division'"
-          class="flex items-center gap-3 px-8 py-4 rounded-2xl transition-all duration-300 font-black text-2xl"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 font-black text-lg sm:text-2xl min-w-[140px]"
         >
-          <span class="text-3xl">÷</span>
+          <span class="text-2xl">÷</span>
           <span>Деление</span>
         </button>
       </div>
